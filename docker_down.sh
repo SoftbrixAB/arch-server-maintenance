@@ -1,10 +1,24 @@
 #!/bin/sh
+set -eu
 
-for d in */ ; do
+if command -v docker-compose >/dev/null 2>&1; then
+    dc="docker-compose"
+elif docker compose version >/dev/null 2>&1; then
+    dc="docker compose"
+else
+    echo "Neither 'docker-compose' nor 'docker compose' is available" >&2
+    exit 1
+fi
+
+failed=0
+for d in */; do
+    [ -f "${d}docker-compose.yml" ] || [ -f "${d}docker-compose.yaml" ] || [ -f "${d}compose.yml" ] || [ -f "${d}compose.yaml" ] || continue
     echo "$d"
-    cd $d
-    if [ $? -eq 0 ]; then
-        docker-compose down
-        cd ..
+    if ( cd "$d" && $dc down ); then
+        :
+    else
+        echo "docker down failed in $d" >&2
+        failed=1
     fi
 done
+exit "$failed"
