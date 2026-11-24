@@ -6,7 +6,11 @@ if [ "$(id -u)" -ne 0 ]; then
     exit 1
 fi
 
-count="$(pacman -Qu | wc -l)"
+if command -v checkupdates >/dev/null 2>&1; then
+    count="$({ checkupdates 2>/dev/null || true; } | wc -l)"
+else
+    count="$({ pacman -Qu 2>/dev/null || true; } | wc -l)"
+fi
 echo "Pending package updates: $count"
 
 running_kernel="$(uname -r)"
