@@ -10,6 +10,8 @@ so they are suitable for cron or systemd timers.
 - Root privileges for `update_system.sh`, `maintenance.sh`, `check_updates.sh`,
   `reboot_if_needed.sh`, `backup.sh`, `restore.sh`, and `security_audit.sh`
 - `rsync` for `backup.sh` / `restore.sh`
+- `pacman-contrib` (optional, provides `checkupdates`) for accurate update
+  counts in `check_updates.sh` / `reboot_if_needed.sh`
 - Docker with either the Compose v2 plugin (`docker compose`) or the legacy
   `docker-compose` binary (the docker scripts); one of the two is required
 
@@ -75,6 +77,11 @@ Reports how many package updates are pending and whether a reboot is required
 ```sh
 sudo ./check_updates.sh
 ```
+
+The update count uses `checkupdates` from the `pacman-contrib` package when
+available, which compares against a freshly downloaded repo database (not the
+local cache); otherwise it falls back to `pacman -Qu` (local sync DB — refresh
+it with `pacman -Sy` for accurate results).
 
 Exit codes: `0` = up to date / no reboot needed, `2` = reboot required,
 `1` = error (e.g. not run as root). Handy for monitoring and alerting.
